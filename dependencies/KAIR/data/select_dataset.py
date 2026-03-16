@@ -9,6 +9,9 @@
 '''
 
 
+import sys
+import os
+
 def define_Dataset(dataset_opt):
     dataset_type = dataset_opt['dataset_type'].lower()
     if dataset_type in ['l', 'low-quality', 'input-only']:
@@ -34,6 +37,20 @@ def define_Dataset(dataset_opt):
     # -----------------------------------------
     elif dataset_type in ['sr', 'super-resolution']:
         from data.dataset_sr import DatasetSR as D
+        
+    elif dataset_type in ['mstbic']:
+        from data.dataset_mstbic import MSTbicGradientDataset
+        # We wrap it to fit KAIR's define_Dataset expectation
+        dataset = MSTbicGradientDataset(
+            lr_dir=dataset_opt['dataroot_L'],
+            hr_dir=dataset_opt['dataroot_H'],
+            hr_patch_size=dataset_opt['H_size'],
+            scale=dataset_opt['scale'],
+            top_k_fraction=0.8,
+            precompute=True
+        )
+        print(f'Dataset [{dataset.__class__.__name__} - {dataset_opt["name"]}] is created.')
+        return dataset
 
     elif dataset_type in ['srmd']:
         from data.dataset_srmd import DatasetSRMD as D

@@ -12,6 +12,7 @@ from models.loss_fftmix import FFTMixLoss
 
 from utils.utils_model import test_mode
 from utils.utils_regularizers import regularizer_orth, regularizer_clip
+from mikrosr.train.losses_frequency import CombinedFreqLoss
 
 
 class ModelPlain(ModelBase):
@@ -101,6 +102,8 @@ class ModelPlain(ModelBase):
         elif G_lossfn_type == 'fftmix':
             alpha = self.opt_train.get('G_lossfn_mix_alpha', .3)
             self.G_lossfn = FFTMixLoss(alpha=alpha).to(self.device)
+        elif G_lossfn_type == 'mstbic':
+            self.G_lossfn = CombinedFreqLoss().to(self.device)
         else:
             raise NotImplementedError('Loss type [{:s}] is not found.'.format(G_lossfn_type))
         self.G_lossfn_weight = self.opt_train['G_lossfn_weight']
