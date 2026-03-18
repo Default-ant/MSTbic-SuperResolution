@@ -1,0 +1,118 @@
+{
+  "task": "mstbic_swinir_lw_x4_lenna",
+  "model": "plain",
+  "gpu_ids": null,
+  "dist": false,
+  "scale": 4,
+  "n_channels": 3,
+  "path": {
+    "root": "superresolution",
+    "pretrained_netG": null,
+    "pretrained_netE": null,
+    "task": "superresolution/mstbic_swinir_lw_x4_lenna",
+    "log": "superresolution/mstbic_swinir_lw_x4_lenna",
+    "options": "superresolution/mstbic_swinir_lw_x4_lenna/options",
+    "models": "superresolution/mstbic_swinir_lw_x4_lenna/models",
+    "images": "superresolution/mstbic_swinir_lw_x4_lenna/images",
+    "pretrained_optimizerG": null
+  },
+  "datasets": {
+    "train": {
+      "name": "train_dataset",
+      "dataset_type": "mstbic",
+      "dataroot_H": "data/MSTbic/train/HR",
+      "dataroot_L": "data/MSTbic/train/LR",
+      "H_size": 256,
+      "dataloader_shuffle": true,
+      "dataloader_num_workers": 2,
+      "dataloader_batch_size": 2,
+      "phase": "train",
+      "scale": 4,
+      "n_channels": 3
+    },
+    "test": {
+      "name": "test_dataset",
+      "dataset_type": "mstbic",
+      "dataroot_H": "data/MSTbic/train/HR",
+      "dataroot_L": "data/MSTbic/train/LR",
+      "H_size": 256,
+      "dataloader_shuffle": false,
+      "dataloader_num_workers": 1,
+      "dataloader_batch_size": 1,
+      "phase": "test",
+      "scale": 4,
+      "n_channels": 3
+    }
+  },
+  "netG": {
+    "net_type": "swinir",
+    "upscale": 4,
+    "in_chans": 3,
+    "img_size": 64,
+    "window_size": 8,
+    "img_range": 1.0,
+    "depths": [
+      6,
+      6,
+      6,
+      6
+    ],
+    "embed_dim": 60,
+    "num_heads": [
+      6,
+      6,
+      6,
+      6
+    ],
+    "mlp_ratio": 2,
+    "upsampler": "pixelshuffle",
+    "resi_connection": "1conv",
+    "init_type": "default",
+    "scale": 4
+  },
+  "train": {
+    "G_lossfn_type": "mstbic",
+    "G_lossfn_weight": 1.0,
+    "E_decay": 0.999,
+    "G_optimizer_type": "adam",
+    "G_optimizer_lr": 0.0002,
+    "G_optimizer_wd": 0,
+    "G_optimizer_clipgrad": null,
+    "G_optimizer_reuse": true,
+    "G_scheduler_type": "MultiStepLR",
+    "G_scheduler_milestones": [
+      250000,
+      400000,
+      450000,
+      475000,
+      500000
+    ],
+    "G_scheduler_gamma": 0.5,
+    "G_regularizer_orthstep": null,
+    "G_regularizer_clipstep": null,
+    "G_param_strict": true,
+    "E_param_strict": true,
+    "checkpoint_test": 50,
+    "checkpoint_save": 5000,
+    "checkpoint_print": 5,
+    "F_feature_layer": 34,
+    "F_weights": 1.0,
+    "F_lossfn_type": "l1",
+    "F_use_input_norm": true,
+    "F_use_range_norm": false,
+    "G_optimizer_betas": [
+      0.9,
+      0.999
+    ],
+    "G_scheduler_restart_weights": 1
+  },
+  "opt_path": "options/train_configs/MSTbic/test_mstbic.json",
+  "is_train": true,
+  "merge_bn": false,
+  "merge_bn_startpoint": -1,
+  "find_unused_parameters": true,
+  "use_static_graph": false,
+  "num_gpu": 0,
+  "rank": 0,
+  "world_size": 1
+}

@@ -615,6 +615,34 @@ class UpsampleOneStep(nn.Sequential):
         return flops
 
 
+class UpsampleCustom(nn.Sequential):
+    """Upsample module (LayerNorm + 2x Conv + PixelShuffle)
+       As shown in diagram b) of the paper draft.
+
+    Args:
+        scale (int): Scale factor.
+        num_feat (int): Channel number of intermediate features.
+        num_out_ch (int): Channel number of output features.
+    """
+    def __init__(self, scale, num_feat, num_out_ch):
+        m = []
+        m.append(nn.LayerNorm(num_feat))
+        m.append(nn.Conv2d(num_feat, num_feat, 3, 1, 1))
+        m.append(nn.Conv2d(num_feat, num_out_ch * scale**2, 3, 1, 1))
+        m.append(nn.PixelShuffle(scale))
+        super(UpsampleCustom, self).__init__(*m)
+
+    def forward(self, x):
+        # x is (B, C, H, W)
+        # LayerNorm expects (B, *, C) or (B, H, W, C)
+        # We need to permute for LayerNorm if using standard nn.LayerNorm
+        b, c, h, w = x.shape
+        x = x.permute(0, 2, 3, 1) # B H W C
+        x = self[0](x) # LayerNorm
+        x = x.permute(0, 3, 1, 2) # B C H W
+        for i in range(1, len(self)):
+            x = self[i](x)
+        return x
 class SwinIR(nn.Module):
     r""" SwinIR
         A PyTorch impl of : `SwinIR: Image Restoration Using Swin Transformer`, based on Swin Transformer.
@@ -757,6 +785,9 @@ class SwinIR(nn.Module):
             self.conv_hr = nn.Conv2d(num_feat, num_feat, 3, 1, 1)
             self.conv_last = nn.Conv2d(num_feat, num_out_ch, 3, 1, 1)
             self.lrelu = nn.LeakyReLU(negative_slope=0.2, inplace=True)
+        elif self.upsampler == 'custom':
+            # for "our architecture" (LayerNorm + 2x Conv + PixelShuffle)
+            self.upsample = UpsampleCustom(upscale, embed_dim, num_out_ch)
         else:
             # for image denoising and JPEG compression artifact reduction
             self.conv_last = nn.Conv2d(embed_dim, num_out_ch, 3, 1, 1)
@@ -828,6 +859,11 @@ class SwinIR(nn.Module):
             x = self.lrelu(self.conv_up1(torch.nn.functional.interpolate(x, scale_factor=2, mode='nearest')))
             x = self.lrelu(self.conv_up2(torch.nn.functional.interpolate(x, scale_factor=2, mode='nearest')))
             x = self.conv_last(self.lrelu(self.conv_hr(x)))
+        elif self.upsampler == 'custom':
+            # for "our architecture"
+            x = self.conv_first(x)
+            x = self.conv_after_body(self.forward_features(x)) + x
+            x = self.upsample(x)
         else:
             # for image denoising and JPEG compression artifact reduction
             x_first = self.conv_first(x)
@@ -855,11 +891,11 @@ if __name__ == '__main__':
     window_size = 8
     height = (1024 // upscale // window_size + 1) * window_size
     width = (720 // upscale // window_size + 1) * window_size
-    model = SwinIR(upscale=2, img_size=(height, width),
+    model = SwinIR(upscale=upscale, img_size=(height, width),
                    window_size=window_size, img_range=1., depths=[6, 6, 6, 6],
-                   embed_dim=60, num_heads=[6, 6, 6, 6], mlp_ratio=2, upsampler='pixelshuffledirect')
+                   embed_dim=60, num_heads=[6, 6, 6, 6], mlp_ratio=2, upsampler='custom')
     print(model)
-    print(height, width, model.flops() / 1e9)
+    # print(height, width, model.flops() / 1e9) # skip flops for now as it might need update
 
     x = torch.randn((1, 3, height, width))
     x = model(x)
