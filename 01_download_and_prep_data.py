@@ -50,7 +50,12 @@ def main():
         print(f"MSTbic dataset already prepared at {OUT_MSTBIC_DIR}. Skipping generation.")
         return
 
-    prep_script = "src/mikrosr/dataprep/prepare_mstbic_dataset.py"
+    # Path detection logic for Kaggle/Remote environments
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    prep_script = os.path.join(base_dir, "src", "mikrosr", "dataprep", "prepare_mstbic_dataset.py")
+    
+    # Ensure all data paths are also relative to base_dir if needed, 
+    # but for Kaggle, relative to CWD is usually fine if we cd in.
     
     # Run the existing data preparation tools
     cmd = [

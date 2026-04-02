@@ -11,10 +11,12 @@ def main():
     """
     print("\n--- Phase 4: Model Training (MSTbic SwinIR) ---")
     
+    # Path detection logic for Kaggle/Remote environments
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    
     # Setup PYTHONPATH so the KAIR library dependencies are found
-    cwd = os.getcwd()
-    kair_path = os.path.join(cwd, "dependencies", "KAIR")
-    src_path = os.path.join(cwd, "src")
+    kair_path = os.path.join(base_dir, "dependencies", "KAIR")
+    src_path = os.path.join(base_dir, "src")
     
     env = os.environ.copy()
     env["PYTHONPATH"] = f"{kair_path}:{src_path}:{env.get('PYTHONPATH', '')}"
@@ -23,7 +25,7 @@ def main():
     train_script = os.path.join(src_path, "mikrosr", "train", "main_train_psnr_custom.py")
     
     # Path to the new configuration we made
-    config_file = os.path.join("options", "train_configs", "MSTbic", "train_div2k_100.json")
+    config_file = os.path.join(base_dir, "options", "train_configs", "MSTbic", "train_div2k_100.json")
 
     cmd = [sys.executable, train_script, "--opt", config_file]
 
