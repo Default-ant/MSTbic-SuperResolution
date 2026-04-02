@@ -65,7 +65,7 @@ class PSNR(Metric):
         self.unit = "dB"
 
     def measure(self, img1, img2):
-        print("hello"+str(img1.shape) +"_"+ str(img2.shape))
+
         return calculate_psnr(img1, img2)
 
 
