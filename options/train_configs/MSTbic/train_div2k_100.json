@@ -8,7 +8,7 @@
   "n_channels": 3,
   "path": {
     "root": "superresolution",
-    "pretrained_netG": "swinir_lw_x4_baseline.pth"
+    "pretrained_netG": "5500_G.pth"
   },
 
   "datasets": {

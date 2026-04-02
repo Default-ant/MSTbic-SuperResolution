@@ -17,13 +17,12 @@ def main():
     model = SwinIR(upscale=4, in_chans=3, img_size=64, window_size=8,
                   img_range=1.0, depths=[6, 6, 6, 6], embed_dim=60, 
                   num_heads=[6, 6, 6, 6], mlp_ratio=2, 
-                  upsampler='pixelshuffle', resi_connection='1conv').to(device)
+                  upsampler='pixelshuffledirect', resi_connection='1conv').to(device)
     
     # Load weights
-    model_path = '/home/krish/dip/SuperResolutionMultiscaleTraining/superresolution/mstbic_swinir_lw_x4_lenna/models/30_G.pth'
-    param_key = 'params'
+    model_path = '/home/krish/dip/FARB weights/5500_E.pth'
     pretrained_model = torch.load(model_path, map_location=device)
-    model.load_state_dict(pretrained_model[param_key] if param_key in pretrained_model.keys() else pretrained_model, strict=True)
+    model.load_state_dict(pretrained_model, strict=True)
     model.eval()
 
     testset_dir = '/home/krish/dip/SuperResolutionMultiscaleTraining/dependencies/KAIR/testsets/set5'

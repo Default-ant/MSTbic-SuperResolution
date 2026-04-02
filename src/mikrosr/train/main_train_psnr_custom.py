@@ -263,7 +263,9 @@ def main(json_path='options/train_msrresnet_psnr.json'):
                     #current_psnr = util.calculate_psnr(E_img, H_img, border=border)
                     current_metrics = {m.name: m.measure(E_img, H_img) for m in eval_metrics}
 
-                    logger.info(f'{idx:->4d}--> {image_name_ext:>10s} | {current_metrics}')
+                    # Silence per-image logs for cleaner training
+                    if idx % 100 == 0:
+                        logger.info(f'Validating image {idx:->4d}--> {image_name_ext:>10s}')
 
                     #avg_psnr += current_psnr
                     avg_metrics = {m.name:avg_metrics[m.name] + current_metrics[m.name] for m in eval_metrics}
