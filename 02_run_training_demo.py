@@ -27,6 +27,21 @@ def main():
     # Path to the new configuration we made
     config_file = os.path.join(base_dir, "options", "train_configs", "MSTbic", "train_div2k_100.json")
 
+    # --- MUST COPY WEIGHTS FOR RESUME ---
+    # KAIR looks inside the task's 'models' folder to automatically find the latest iteration.
+    models_dir = os.path.join(base_dir, "superresolution", "mstbic_swinir_lw_div2k_100", "models")
+    pretrained_dir = os.path.join(base_dir, "pretrained_models")
+    os.makedirs(models_dir, exist_ok=True)
+    
+    if os.path.exists(pretrained_dir):
+        import glob
+        import shutil
+        for weight_file in glob.glob(os.path.join(pretrained_dir, "*.pth")):
+            target_path = os.path.join(models_dir, os.path.basename(weight_file))
+            if not os.path.exists(target_path):
+                print(f"Pre-loading resume checkpoint: {os.path.basename(weight_file)}")
+                shutil.copy(weight_file, target_path)
+
     cmd = [sys.executable, train_script, "--opt", config_file]
 
     print("\nChecking Hardware...")

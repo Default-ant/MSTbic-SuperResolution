@@ -8,7 +8,7 @@
   "n_channels": 3,
   "path": {
     "root": "superresolution",
-    "pretrained_netG": "pretrained_models/5500_G.pth"
+    "pretrained_netG": null
   },
 
   "datasets": {
